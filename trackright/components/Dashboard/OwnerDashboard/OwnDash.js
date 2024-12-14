@@ -1,7 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import { Card, Button, Chip } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
 
 const OwnDash = () => {
   const [employees, setEmployees] = useState([
@@ -13,8 +22,12 @@ const OwnDash = () => {
   ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isNotifVisible, setIsNotifVisible] = useState(false); // For notifications
+  const [isBurgerMenuVisible, setIsBurgerMenuVisible] = useState(false); // For burger menu
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
+  const navigation = useNavigation();
 
   const handleAddEmployee = () => {
     if (firstName.trim() && lastName.trim()) {
@@ -38,10 +51,53 @@ const OwnDash = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Icon name="menu" size={24} />
+        <TouchableOpacity onPress={() => setIsBurgerMenuVisible(true)}>
+          <Icon name="menu" size={24} color="#fff" />
+        </TouchableOpacity>
         <TextInput placeholder="Search" style={styles.searchInput} />
-        <Icon name="notifications" size={24} />
+        <TouchableOpacity onPress={() => setIsNotifVisible(true)}>
+          <Icon name="notifications" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
+
+      {/* Burger Menu Modal */}
+      <Modal visible={isBurgerMenuVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Menu</Text>
+            <Button
+              mode="text"
+              onPress={() => {
+                navigation.navigate("OwnProfile");
+                setIsBurgerMenuVisible(false);
+              }}
+            >
+              Profile
+            </Button>
+            <Button
+              mode="text"
+              onPress={() => {
+                navigation.navigate("Login");
+                setIsBurgerMenuVisible(false);
+              }}
+            >
+              Logout
+            </Button>
+            <Button onPress={() => setIsBurgerMenuVisible(false)}>Close</Button>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Notifications Modal */}
+      <Modal visible={isNotifVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Notifications</Text>
+            <Text>No new notifications!</Text>
+            <Button onPress={() => setIsNotifVisible(false)}>Close</Button>
+          </View>
+        </View>
+      </Modal>
 
       {/* Date Picker */}
       <FlatList
@@ -73,7 +129,11 @@ const OwnDash = () => {
 
       {/* Employee List Header */}
       <View style={styles.listHeader}>
-        <Button mode="contained" style={styles.addButton} onPress={() => setIsModalVisible(true)}>
+        <Button
+          mode="contained"
+          style={styles.addButton}
+          onPress={() => setIsModalVisible(true)}
+        >
           Add New Employee
         </Button>
         <TextInput placeholder="Search Employee" style={styles.searchInput} />
@@ -111,10 +171,18 @@ const OwnDash = () => {
               style={styles.input}
             />
             <View style={styles.modalButtons}>
-              <Button mode="contained" onPress={handleAddEmployee} style={styles.modalButton}>
+              <Button
+                mode="contained"
+                onPress={handleAddEmployee}
+                style={styles.modalButton}
+              >
                 Add
               </Button>
-              <Button mode="text" onPress={() => setIsModalVisible(false)} style={styles.modalCancelButton}>
+              <Button
+                mode="text"
+                onPress={() => setIsModalVisible(false)}
+                style={styles.modalCancelButton}
+              >
                 Cancel
               </Button>
             </View>
@@ -127,7 +195,12 @@ const OwnDash = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#9AA6B2", padding: 16 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   searchInput: {
     flex: 1,
     marginHorizontal: 16,
@@ -147,11 +220,25 @@ const styles = StyleSheet.create({
   },
   activeDate: { backgroundColor: "#606676" },
   dateText: { color: "#fff", fontWeight: "bold" },
-  filters: { flexDirection: "row", justifyContent: "space-around", marginBottom: 16 },
+  filters: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+  },
   chip: { backgroundColor: "#606676", color: "#FFFFFF" },
-  listHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  addButton: { backgroundColor: "#606676", borderRadius: 25 },
-  card: { marginBottom: 8, padding: 16, backgroundColor: "#FFFFFF", borderRadius: 8 },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  addButton: { backgroundColor: "#E2D4F7", borderRadius: 25 },
+  card: {
+    marginBottom: 8,
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+  },
   employeeName: { fontWeight: "bold", fontSize: 16, marginBottom: 8 },
   modalContainer: {
     flex: 1,
@@ -159,12 +246,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: { backgroundColor: "#fff", padding: 20, borderRadius: 8, width: "80%" },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
-  input: { backgroundColor: "#f0f0f0", padding: 10, borderRadius: 8, marginBottom: 16 },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 8,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    height: 40,
+  },
   modalButtons: { flexDirection: "row", justifyContent: "space-between" },
-  modalButton: { backgroundColor: "#606676", borderRadius: 8, flex: 1, marginRight: 8 },
-  modalCancelButton: { borderRadius: 8, flex: 1 },
+  modalButton: { flex: 1, marginRight: 8, backgroundColor: "#8872A8" },
+  modalCancelButton: { flex: 1, backgroundColor: "#ccc" },
 });
 
 export default OwnDash;
