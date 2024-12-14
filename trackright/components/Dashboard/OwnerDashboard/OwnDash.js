@@ -6,9 +6,10 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  ScrollView,
   Modal,
 } from "react-native";
-import { Card, Button, Chip } from "react-native-paper";
+import { Card, Button } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -18,7 +19,7 @@ const OwnDash = () => {
     { id: "2", name: "Nathalie Jugapao", timeIn: "10:38 AM", timeOut: "05:05 PM", breakTime: "01:05 hr" },
     { id: "3", name: "Afiah Gino", timeIn: "09:40 AM", timeOut: "04:44 PM", breakTime: "01:00 hr" },
     { id: "4", name: "Rex Arnado", timeIn: "09:00 AM", timeOut: "05:00 PM", breakTime: "01:00 hr" },
-    { id: "5", name: "Marben Cańizares", timeIn: "08:40 AM", timeOut: "04:40 PM", breakTime: "01:00 hr" },
+    { id: "5", name: "Marben Cañizares", timeIn: "08:40 AM", timeOut: "04:40 PM", breakTime: "01:00 hr" },
   ]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -52,11 +53,11 @@ const OwnDash = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setIsBurgerMenuVisible(true)}>
-          <Icon name="menu" size={24} color="#fff" />
+          <Icon name="menu" size={24} color="black" />
         </TouchableOpacity>
         <TextInput placeholder="Search" style={styles.searchInput} />
         <TouchableOpacity onPress={() => setIsNotifVisible(true)}>
-          <Icon name="notifications" size={24} color="#fff" />
+          <Icon name="notifications" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -77,7 +78,7 @@ const OwnDash = () => {
             <Button
               mode="text"
               onPress={() => {
-                navigation.navigate("Login");
+                navigation.navigate("RoleSelection");
                 setIsBurgerMenuVisible(false);
               }}
             >
@@ -119,13 +120,20 @@ const OwnDash = () => {
       />
 
       {/* Filters */}
-      <View style={styles.filters}>
-        <Chip style={styles.chip}>All</Chip>
-        <Chip style={styles.chip}>Employees</Chip>
-        <Chip style={styles.chip}>Active</Chip>
-        <Chip style={styles.chip}>Pending</Chip>
-        <Chip style={styles.chip}>Deactivated</Chip>
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filters}>
+        {['All', 'Employees', 'Active', 'Pending', 'Deactivated'].map((filter, index) => (
+          <TouchableOpacity key={index} style={styles.filterButton}>
+            <Text
+              style={[
+                styles.filterText,
+                filter === 'All' && { fontWeight: 'bold' }, // Make "All" bold
+              ]}
+            >
+              {filter}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* Employee List Header */}
       <View style={styles.listHeader}>
@@ -136,7 +144,10 @@ const OwnDash = () => {
         >
           Add New Employee
         </Button>
-        <TextInput placeholder="Search Employee" style={styles.searchInput} />
+        <TextInput placeholder="Search"
+          style={styles.searchInput}
+          placeholderTextColor="#555"
+        />
       </View>
 
       {/* Employee List */}
@@ -175,6 +186,7 @@ const OwnDash = () => {
                 mode="contained"
                 onPress={handleAddEmployee}
                 style={styles.modalButton}
+                labelStyle={{ color: "#FFFFFF" }} // White text for "Add"
               >
                 Add
               </Button>
@@ -182,6 +194,7 @@ const OwnDash = () => {
                 mode="text"
                 onPress={() => setIsModalVisible(false)}
                 style={styles.modalCancelButton}
+                labelStyle={{ color: "#000000" }} // Black text for "Cancel"
               >
                 Cancel
               </Button>
@@ -204,17 +217,17 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     marginHorizontal: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#e0e0e0",
     borderRadius: 8,
     paddingHorizontal: 8,
     height: 40,
   },
   datePicker: { marginBottom: 16 },
   dateItem: {
-    padding: 8,
+    padding: 13,
     marginHorizontal: 4,
     backgroundColor: "#ddd",
-    borderRadius: 8,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -222,14 +235,22 @@ const styles = StyleSheet.create({
   dateText: { color: "#fff", fontWeight: "bold" },
   filters: {
     flexDirection: "row",
-    justifyContent: "space-around",
     marginBottom: 16,
   },
-  chip: { backgroundColor: "#606676", color: "#FFFFFF" },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#606676",
+    borderRadius: 5,
+    marginHorizontal: 5,
+    justifyContent: "center", // Centers vertically
+    alignItems: "center", // Centers horizontally
+  },
+  filterText: { color: "#FFFFFF", fontWeight: "400" },
   listHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    textAlign: "center",
     marginBottom: 16,
   },
   addButton: { backgroundColor: "#E2D4F7", borderRadius: 25 },
@@ -266,7 +287,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   modalButtons: { flexDirection: "row", justifyContent: "space-between" },
-  modalButton: { flex: 1, marginRight: 8, backgroundColor: "#8872A8" },
+  modalButton: { flex: 1, marginRight: 8, backgroundColor: "#606676" },
   modalCancelButton: { flex: 1, backgroundColor: "#ccc" },
 });
 

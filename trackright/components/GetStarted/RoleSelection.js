@@ -9,7 +9,7 @@ const RoleSelection = ({ navigation }) => {
         <Image
           source={require("../../assets/TrackRight.png")}
           style={styles.logo}
-          onTouchEnd={() => navigation.navigate("Intro")} // Navigate to Intro screen
+          onTouchEnd={() => navigation.navigate("Intro")}
         />
       </View>
       <Button
@@ -17,7 +17,7 @@ const RoleSelection = ({ navigation }) => {
         style={[styles.button, styles.topButton]}
         contentStyle={styles.buttonContent}
         labelStyle={styles.buttonText}
-        onPress={() => navigation.navigate("Login", { userType: "owner" })} // Navigate to Login for Owner
+        onPress={() => navigation.navigate("Login", { userType: "owner" })}
       >
         Business Owner / Manager
       </Button>
@@ -26,7 +26,7 @@ const RoleSelection = ({ navigation }) => {
         style={[styles.button, styles.bottomButton]}
         contentStyle={styles.buttonContent}
         labelStyle={styles.buttonText}
-        onPress={() => navigation.navigate("Login", { userType: "employee" })} // Navigate to Login for Employee
+        onPress={() => navigation.navigate("Login", { userType: "employee" })}
       >
         Employee
       </Button>
