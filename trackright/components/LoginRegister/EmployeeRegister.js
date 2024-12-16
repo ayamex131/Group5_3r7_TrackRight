@@ -1,51 +1,50 @@
 import React, { useState } from "react";
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, TextInput, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import supabase from "../../config/supabaseClients";
 
-const Register = ({ route }) => {
+const EmployeeRegister = () => {
   const navigation = useNavigation();
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("Owner");
   const [error, setError] = useState("");
-  const [securePassword, setSecurePassword] = useState(true);
-  const [secureConfirmPassword, setSecureConfirmPassword] = useState(true);
- 
+
   const handleRegister = async () => {
-    if (!username || !email || !password || !confirmPassword || !role) {
-      setError("All fields are required");
+    if (!username || !email || !password || !confirmPassword) {
+      setError("All fields are required.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match.");
       return;
     }
 
     try {
-      // Insert into the Users table
+      // Insert into Users table
       const { data, error } = await supabase
         .from("users")
-        .insert([{ username, email, password, role, status: "Active" }])
+        .insert([{ username, email, password, role: "Employee", status: "Active" }])
         .select("user_id")
         .single();
 
       if (error) {
-        setError("Error creating user: " + error.message);
+        console.error("Error registering employee:", error);
+        setError("Error: " + error.message);
         return;
       }
 
-      // Save user_id to pass it to the next screen
       const userId = data.user_id;
+      console.log("User registered, userId:", userId); // Log userId for debugging
 
-      // Navigate to the Owner Profile page with userId as a parameter
-      navigation.navigate("Owner_initial_profile", { userId, email });
+      // Redirect to EmployeeInitialProfile
+      navigation.navigate("EmployeeInitialProfile", { userId });
     } catch (err) {
-      setError("An unexpected error occurred");
-      console.error(err);
+      console.error("Unexpected error:", err);
+      setError("An unexpected error occurred.");
     }
   };
 
@@ -54,7 +53,7 @@ const Register = ({ route }) => {
       <Image source={require("../../assets/TrackRight.png")} style={styles.logo} />
 
       <View style={styles.card}>
-        <Text style={styles.title}>Register</Text>
+        <Text style={styles.title}>Employee Register</Text>
 
         <TextInput
           style={styles.input}
@@ -82,17 +81,15 @@ const Register = ({ route }) => {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Role (Owner or Employee)"
-          value={role}
-          onChangeText={setRole}
-        />
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.forgotText}>Already have an account? Login</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -107,7 +104,8 @@ const styles = StyleSheet.create({
   input: { height: 40, borderColor: "#ccc", borderWidth: 1, borderRadius: 5, marginBottom: 10, paddingLeft: 10 },
   button: { padding: 15, marginBottom: 10, borderRadius: 5, backgroundColor: "#606676" },
   buttonText: { color: "#fff", textAlign: "center", fontSize: 16 },
+  forgotText: { color: "#606676", textAlign: "center", marginTop: 10 },
   errorText: { color: "red", textAlign: "center", marginBottom: 10 },
 });
 
-export default Register;
+export default EmployeeRegister;

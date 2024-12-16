@@ -1,47 +1,52 @@
-import React, { useState, useEffect } from "react";
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import { View, TextInput, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome for eye icon
+import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for eye icon
+import supabase from "../../config/supabaseClients"; // Ensure your Supabase client is properly configured
 
 const Login = ({ route }) => {
   const navigation = useNavigation();
-  const { userType } = route.params || {};
+  const { userType } = route.params || {}; // Get userType ("owner" or "employee")
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [secureText, setSecureText] = useState(true);
 
-  useEffect(() => {
-    const checkCredentials = async () => {
-      const storedEmail = await AsyncStorage.getItem("email");
-      const storedPassword = await AsyncStorage.getItem("password");
-      if (storedEmail && storedPassword) {
-        setEmail(storedEmail);
-        setPassword(storedPassword);
-      }
-    };
-    checkCredentials();
-  }, []);
-
   const handleLogin = async () => {
     if (!email || !password) {
-      setError("Field must not be empty");
+      setError("Fields must not be empty.");
       return;
     }
 
-    const storedEmail = await AsyncStorage.getItem("email");
-    const storedPassword = await AsyncStorage.getItem("password");
+    try {
+      // Fetch user from the Users table
+      const { data: user, error: fetchError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .eq("password", password) // Directly matching password (not recommended for production; hash passwords instead)
+        .single();
 
-    if (email === storedEmail && password === storedPassword) {
-      if (userType === "owner") {
-        navigation.navigate("OwnDash");
-      } else if (userType === "employee") {
-        navigation.navigate("EmpDash");
+      if (fetchError || !user) {
+        setError("Invalid email or password.");
+        console.error("Fetch error:", fetchError);
+        return;
       }
-    } else {
-      setError("Incorrect credentials");
+
+      const userId = user.user_id; // Use `user_id` from the fetched user
+
+      // Navigate to the correct dashboard based on role
+      if (user.role === "Owner") {
+        navigation.navigate("OwnDash", { userId });
+      } else if (user.role === "Employee") {
+        navigation.navigate("EmployeeProfile", { userId });
+      } else {
+        setError("Invalid user role.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -71,7 +76,7 @@ const Login = ({ route }) => {
             onChangeText={setPassword}
           />
           <TouchableOpacity onPress={() => setSecureText(!secureText)} style={styles.eyeIcon}>
-            <Icon name={secureText ? 'eye-slash' : 'eye'} size={20} color="#606676" />
+            <Icon name={secureText ? "eye-slash" : "eye"} size={20} color="#606676" />
           </TouchableOpacity>
         </View>
 
@@ -85,8 +90,12 @@ const Login = ({ route }) => {
           <Text style={styles.forgotText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Register", { userType })}>
-          <Text style={styles.forgotText}>Doesn't have an account? Register</Text>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate(userType === "owner" ? "Register" : "EmployeeRegister", { userType })
+          }
+        >
+          <Text style={styles.forgotText}>Don't have an account? Register</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -99,13 +108,13 @@ const styles = StyleSheet.create({
   card: { width: "80%", padding: 20, borderRadius: 10, backgroundColor: "#f8f8f8", shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 3.5, elevation: 5 },
   title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
   input: { height: 40, borderColor: "#ccc", borderWidth: 1, borderRadius: 5, marginBottom: 10, paddingLeft: 10 },
-  passwordContainer: { position: 'relative' },
+  passwordContainer: { position: "relative" },
   passwordInput: { paddingRight: 30 },
-  eyeIcon: { position: 'absolute', right: 10, top: 10 },
+  eyeIcon: { position: "absolute", right: 10, top: 10 },
   button: { padding: 15, marginBottom: 10, borderRadius: 5, backgroundColor: "#606676" },
   buttonText: { color: "#fff", textAlign: "center", fontSize: 16 },
   forgotText: { color: "#606676", textAlign: "center", marginTop: 10 },
-  errorText: { color: "red", fontSize: 12, textAlign: "center", marginBottom: 10 },
+  errorText: { color: "red", textAlign: "center", marginBottom: 10 },
 });
 
 export default Login;
